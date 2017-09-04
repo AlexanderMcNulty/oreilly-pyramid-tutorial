@@ -3,7 +3,7 @@
 {%  block content %}
 
 {# python express, call to pyramid's request.route_url to compute our url #}
-<a href="{{ request.route_url('add') }}">text  {{ view.current }} </a>
+<a href="{{ request.route_url('todo_add') }}">text {{ request.url }} </a>
 <br/>
 
 

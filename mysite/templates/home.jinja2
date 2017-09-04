@@ -1,5 +1,5 @@
 {%  extends "base.jinja2" %}
-{%  block title %}ToDos List{% endblock %}
+{%  block title %}Home{% endblock %}
 {%  block content %}
 
     {# python express, call to pyramid's request.route_url to compute our url #}
@@ -7,20 +7,21 @@
     <h1>ToDos - List</h1>
     <br/>
 
+
+    {#  for some reason this does not cause the program to crash #}
+    {#
     {% if msg %}
         <h5>{{  msg }}</h5>
     {% endif %}
+    #}
 
     {# the id value that we are passing in our request.route_url is a nessesary
     the value id is called such because in our __init__.py routes this is what is expected
     other size the api will not work #}
 
-    {# if and for are both examples of control structures #}
+    <a href="{{ request.route_url('todo_add') }}">add  </a>
 
-    {%  for todo in todos %}
-        <a href="{{ request.route_url('todo_view', id=todo.id) }}">title: {{ todo.title }}</a>
-        <a href="{{ request.route_url('todo_edit', id=todo.id) }}">edit</a>
-        <a href="{{ request.route_url('todo_delete', id=todo.id) }}">delete  </a>
-        <br/><br/>
-    {% endfor %}
+    {#  why does this create an error???? #}
+    <a href="{{ request.route_url('todo_view',id=1) }}">sup </a>
+
 {% endblock %}

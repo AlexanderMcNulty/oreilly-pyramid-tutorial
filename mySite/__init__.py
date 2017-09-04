@@ -19,11 +19,15 @@ def list(request):
 def main(global_config, **settings):
     config = Configurator(settings=settings)
     config.include('pyramid_jinja2')
-    config.add_route('list', '/')
-    config.add_route('add', '/add')
-    config.add_route('view', '/{id}')
-    config.add_route('edit', '/{id}/edit')
-    config.add_route('delete', '/{id}/delete')
+    # below is "asset specifications", packagename:pathtoasset (in this case the name of our static directory)
+    # this is awesome because as long as we know our package name and don't modify their directory stree
+    # then we never need to change the path regardless of where our package is used.
+    config.add_static_view(name='static', path='mysite:static')
+    config.add_route('home', '/')
+    config.add_route('todo_list', '/todos')
+    config.add_route('todo_add', '/todos/add')
+    config.add_route('todo_view', '/todos/{id}')
+    config.add_route('todo_edit', '/todos/{id}/edit')
+    config.add_route('todo_delete', '/todos/{id}/delete')
     config.scan()
     return config.make_wsgi_app()
-

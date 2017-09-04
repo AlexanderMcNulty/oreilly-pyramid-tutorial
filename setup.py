@@ -2,7 +2,9 @@ from setuptools import setup
 
 requires = [
     'pyramid',
-    'pyramid_jinja2'
+    'pyramid_jinja2',
+    # deform, will also install colander
+    'deform>=2.0a2'
 ]
 setup(name='mysite',
       install_requires=requires,
