@@ -4,15 +4,16 @@ from pyramid.view import view_config, notfound_view_config
 import colander
 from deform import Form, ValidationFailure
 
+# Session is a convention used by pyramid_sqlalchemy to access underlying mechanisms
+from pyramid_sqlalchemy import Session
+
+from .models import ToDo
 
 class ToDoItem(colander.MappingSchema):
+    # our schema says that the title is a string
+    # if our schema has title as an integer then the appstruct will convert the forms string to an integer
     title = colander.SchemaNode(colander.String())
 
-
-sample_todos = {
-    '1': dict(id='1', title='get milk'),
-    '2': dict(id='2', title='get eggs')
-}
 
 # - check out @view_defaults to define a series of view functions that share a route
 # - but differ in another way for example by their request_method ie. GET, POST, DELETE, PUT
@@ -30,16 +31,14 @@ class MySite:
         # therefore we can not do this in the 'lazy' @property fashion
         self.msg = request.params.get('msg')
 
-
     # using @property we don't have to call it with parenthesis in the template
     @property
     def current(self):
-        todo_id = self.request.matchdict.get('id')
-        todo = sample_todos.get(todo_id)
+        todo_id = int(self.request.matchdict.get('id'))
+        todo = Session.query(ToDo).filter_by(id=todo_id).one()
         if not todo:
-             raise HTTPNotFound()
+            raise HTTPNotFound()
         return todo
-
 
     @notfound_view_config(renderer='templates/notfound.jinja2')
     def not_found(self):
@@ -53,10 +52,11 @@ class MySite:
                  renderer='templates/list.jinja2')
     def list(self):
         # if message was found extract and provide it to the template
-        msg = self.request.params.get('msg')
+        todos = Session.query(ToDo).order_by(ToDo.title)
+        # old static way of passings data to client
+        # msg = self.request.params.get('msg')
         return dict(
-            todos=sample_todos.values(),
-            msg=msg
+            todos=todos
         )
 
     @view_config(route_name='todo_add',
@@ -73,13 +73,18 @@ class MySite:
             appstruct = self.form.validate(controls)
         # if processing the form results in a validation error then return the form with an error message
         except ValidationFailure as e:
+            # form NOT valid
             return dict(add_form=e.render())
         # new_title =  self.request.params.get('title')
         # because we have an appstruct we can get the new title from the appstruct
         # instead of using the self.request.params.get('title')
         title = appstruct['title']
+        Session.add(ToDo(title=title))
+        todo = Session.query(ToDo).filter_by(title=title).one()
         msg = 'new_title: ' + title
-        url = self.request.route_url('todo_list', _query={'msg': msg})
+        url = self.request.route_url('todo_list',
+                                     id=todo.id,
+                                     _query=dict(msg=msg))
         return HTTPFound(url)
 
     @view_config(route_name='todo_view',
@@ -94,7 +99,8 @@ class MySite:
     @view_config(route_name='todo_edit',
                  renderer='templates/edit.jinja2')
     def edit(self):
-        edit_form = self.form.render(self.current)
+        # deform wants a dictionary but sqlalchemy returns an object
+        edit_form = self.form.render(dict(title=self.current.title))
         return dict(todo=self.current, edit_form=edit_form)
 
     # the parameters passed to @view_config are all examples of predicates
@@ -104,13 +110,27 @@ class MySite:
                  renderer='templates/edit.jinja2',
                  request_method='POST')
     def edit_handler(self):
-        new_title = self.request.params.get('title')
-        self.current['title'] = new_title
-        msg = 'new_title: ' + new_title
-        url = self.request.route_url('todo_list', _query={'msg':msg})
+        controls = self.request.POST.items()
+        try:
+            appstruct = self.form.validate(controls)
+        except ValidationFailure as e:
+            # form is NOT valid
+            return dict(edit_form=e.render())
+
+        # Valid form so save the title and redirect with message
+        self.current.title = appstruct['title']
+        # is this equivalent? /\ vs \/
+        # self.current['title'] = new_title
+        msg = 'new_title: ' + appstruct['title']
+        url = self.request.route_url('todo_view',
+                                     id=self.current.id,
+                                     _query=dict(msg=msg))
         return HTTPFound(url)
 
     @view_config(route_name='todo_delete')
     def delete(self):
-        url = self.route_url('todo_list')
+        msg = 'Deleted: %s' % (self.current.id)
+        Session.delete(self.current)
+        url = self.request.route_url('todo_list',
+                             _query=dict(msg=msg))
         return HTTPFound(url)
