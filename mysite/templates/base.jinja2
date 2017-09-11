@@ -18,7 +18,13 @@
     </div>
 </nav>
 
-
+{% if view.messages %}
+    {% for message in view.messages %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+    {% endfor %}
+{%  endif %}
 
 {%  if view.msg %}
     {{  view.msg  }}!!!!!!

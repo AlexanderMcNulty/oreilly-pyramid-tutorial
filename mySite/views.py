@@ -29,7 +29,7 @@ class MySite:
         # extract a message from the url and assign it to the view
         # the html for this is being moved into the base template so 'msg' must exist for every template
         # therefore we can not do this in the 'lazy' @property fashion
-        self.msg = request.params.get('msg')
+        self.messages = request.session.pop_flash()
 
     # using @property we don't have to call it with parenthesis in the template
     @property
@@ -81,10 +81,10 @@ class MySite:
         title = appstruct['title']
         Session.add(ToDo(title=title))
         todo = Session.query(ToDo).filter_by(title=title).one()
-        msg = 'new_title: ' + title
+        self.request.session.flash('Added: %s' % todo.id)
         url = self.request.route_url('todo_list',
-                                     id=todo.id,
-                                     _query=dict(msg=msg))
+                                     id=todo.id
+                                     )
         return HTTPFound(url)
 
     @view_config(route_name='todo_view',
@@ -121,15 +121,16 @@ class MySite:
         self.current.title = appstruct['title']
         # is this equivalent? /\ vs \/
         # self.current['title'] = new_title
-        msg = 'new_title: ' + appstruct['title']
+        self.current.title = appstruct['title']
+        self.request.session.flash('Changed: %s' % self.current.id)
         url = self.request.route_url('todo_view',
-                                     id=self.current.id,
-                                     _query=dict(msg=msg))
+                                     id=self.current.id)
         return HTTPFound(url)
 
     @view_config(route_name='todo_delete')
     def delete(self):
         msg = 'Deleted: %s' % (self.current.id)
+        self.request.session.flash('Deleted: %s' % self.current.id)
         Session.delete(self.current)
         url = self.request.route_url('todo_list',
                              _query=dict(msg=msg))
