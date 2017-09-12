@@ -1,5 +1,6 @@
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
-from pyramid.view import view_config, notfound_view_config
+from pyramid.security import remember, forget
+from pyramid.view import view_config, notfound_view_config, forbidden_view_config
 
 import colander
 from deform import Form, ValidationFailure
@@ -7,7 +8,8 @@ from deform import Form, ValidationFailure
 # Session is a convention used by pyramid_sqlalchemy to access underlying mechanisms
 from pyramid_sqlalchemy import Session
 
-from .models import ToDo
+from .models.todos import ToDo
+from .models.users import User
 
 class ToDoItem(colander.MappingSchema):
     # our schema says that the title is a string
@@ -44,6 +46,27 @@ class MySite:
     def not_found(self):
         return dict()
 
+    @view_config(route_name='login', renderer='templates/login.jinja2')
+    def login(self):
+        return dict()
+
+    @view_config(route_name='login', renderer='templates/login.jinja2',
+                 request_method='POST')
+    def login_handler(self):
+        request = self.request
+        username = request.params['username']
+        password = request.params['password']
+        user = Session.query(User).filter_by(username=username).first()
+        if user and user.password == password:
+            headers = remember(request, username)
+            return HTTPFound(location=request.route_url('home'),
+                             headers=headers)
+        return dict(
+            form_error='Invalid username or password',
+            username=username,
+            password=password,
+        )
+
     @view_config(route_name='home', renderer='templates/home.jinja2')
     def go_home(self):
         return dict()
@@ -65,6 +88,7 @@ class MySite:
         return dict(add_form=self.form.render())
 
     @view_config(route_name='todo_add',
+                 permission='edit',
                  renderer='templates/add.jinja2',
                  request_method='POST')
     def add_handler(self):
@@ -83,9 +107,12 @@ class MySite:
         todo = Session.query(ToDo).filter_by(title=title).one()
         self.request.session.flash('Added: %s' % todo.id)
         url = self.request.route_url('todo_list',
-                                     id=todo.id
-                                     )
+                                     id=todo.id)
         return HTTPFound(url)
+
+    @forbidden_view_config(renderer='templates/forbidden.jinja2')
+    def forbidden(selfs):
+        return dict()
 
     @view_config(route_name='todo_view',
                  renderer='templates/view.jinja2')
@@ -108,7 +135,8 @@ class MySite:
     # removed, request_param='form.submit', deform takes care of this for us.
     @view_config(route_name='todo_edit',
                  renderer='templates/edit.jinja2',
-                 request_method='POST')
+                 request_method='POST',
+                 permission='edit')
     def edit_handler(self):
         controls = self.request.POST.items()
         try:
@@ -135,3 +163,9 @@ class MySite:
         url = self.request.route_url('todo_list',
                              _query=dict(msg=msg))
         return HTTPFound(url)
+
+    @view_config(route_name='logout')
+    def logout(self):
+        headers = forget(self.request)
+        url = self.request.route_url('home')
+        return HTTPFound(location=url, headers=headers)

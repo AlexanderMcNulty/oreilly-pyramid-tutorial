@@ -7,7 +7,8 @@ from pyramid_sqlalchemy import Session
 from pyramid_sqlalchemy.meta import metadata
 from pyramid.paster import get_appsettings, setup_logging
 
-from ..models import ToDo, sample_todos
+from ..models.todos import ToDo, sample_todos
+from ..models.users import User, sample_users
 
 # run this when changes to the schema have been made
 
@@ -37,4 +38,15 @@ def main(argv=sys.argv):
         for todo in sample_todos:
             t = ToDo(title=todo['title'])
             Session.add(t)
+
+        for user in sample_users:
+            u = User(
+                id=user['id'],
+                username=user['username'],
+                password=user['password'],
+                first_name=user['first_name'],
+                last_name=user['last_name'],
+                groups=user['groups']
+            )
+            Session.add(u)
 

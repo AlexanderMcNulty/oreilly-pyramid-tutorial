@@ -2,37 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{%  block title %}{% endblock %} - MySite</title>
-    {# this might not help me remeber but, for fuck sake, linking in css require a
-       <link> that with a href="" attribute  and rel="stylesheet"  #}
+    <title>{% block title %}{% endblock %} - MySite</title>
     <link rel="stylesheet"
-            href="{{request.static_url('mysite:static/mysite.css') }}">
+          href="//oss.maxcdn.com/bootstrap/3.3.4/css/bootstrap.css">
+    <link rel="stylesheet"
+          href="{{ request.static_url('mysite:static/mysite.css') }}">
+    <link rel="shortcut icon"
+          href="{{ request.static_url('mysite:static/pyramid-16x16.png') }}">
 </head>
 <body>
 
-{# although many things in the architecture are dynamic, certain variables will still shit themselves. #}
 
-<nav class="navbar">
-    <div class="navbar navbar-default">
-        {#  <a href="{{ request.route_url('todo_list') }}">TODO</a> #}
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand"
+               href="{{ request.route_url('home') }}">MySite</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="{{ request.route_url('todo_list') }}">
+                    ToDos
+                </a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          {% if request.authenticated_userid %}
+              <li>
+                  <a href="{{ request.route_url('logout') }}">Logout</a>
+              </li>
+          {% else %}
+              <li>
+                  <a href="{{ request.route_url('login') }}">Login</a>
+              </li>
+          {% endif %}
+        </ul>
     </div>
 </nav>
 
-{% if view.messages %}
+<div id="content" class="container">
+
+  {% if view.messages %}
     {% for message in view.messages %}
         <div class="alert alert-info">
-            {{ message }}
+          {{ message }}
         </div>
     {% endfor %}
-{%  endif %}
+  {% endif %}
 
-{%  if view.msg %}
-    {{  view.msg  }}!!!!!!
-{% endif %}
-<h1> hahhhh</h1>
-{% block content %}{% endblock %}
+  {% block content %}{% endblock %}
+</div>
 
-
-<script src="//oss.maxcdn.com/jquery/2.1.3/jquery.js"></script
+<script src="//oss.maxcdn.com/jquery/2.1.3/jquery.js"></script>
 </body>
 </html>
