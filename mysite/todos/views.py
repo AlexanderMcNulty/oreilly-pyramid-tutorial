@@ -8,20 +8,17 @@ import colander
 from deform import Form, ValidationFailure
 
 from pyramid_sqlalchemy import Session
-# from pyramid.security import NO_PERMISSION_REQUIRED
 
-from ..models.todos import ToDo
+from ..todos.models import ToDo
 
 
 class ToDoSchema(colander.MappingSchema):
     title = colander.SchemaNode(colander.String())
 
 
-# By default all views in this class will need the edit permission
 @view_defaults(permission='edit')
 class ToDoViews:
     def __init__(self, context, request):
-        # context (was current) has been removed from a separate function and is passed by the factory
         self.context = context
         self.request = request
         self.schema = ToDoSchema()
@@ -36,7 +33,6 @@ class ToDoViews:
         return dict(todos=todos)
 
     @view_config(route_name='todos_add', renderer='templates/add.jinja2')
-                 #permission=NO_PERMISSION_REQUIRED)
     def add(self):
         return dict(add_form=self.form.render())
 

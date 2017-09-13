@@ -1,12 +1,16 @@
 from pyramid.httpexceptions import HTTPNotFound
-from pyramid.security import Allow, Everyone, Deny
+from pyramid.security import Allow, Everyone
 from sqlalchemy import (
     Column,
     Integer,
-    Text
+    Text,
+    ForeignKey
 )
+from sqlalchemy.orm import relationship
 from pyramid_sqlalchemy import BaseObject, Session
-from . import ArrayType
+
+from ..columns import ArrayType
+
 
 class ToDo(BaseObject):
     __tablename__ = 'todo'
@@ -15,17 +19,22 @@ class ToDo(BaseObject):
     acl = Column(ArrayType)
     default_acl = [
         (Allow, Everyone, 'view'),
-        # they Denial of Jill will not fire because the first acl as already been applied
-        (Deny, 'jill', 'view'),
         (Allow, 'group:editors', 'edit')
     ]
+    owner_id = Column(Integer, ForeignKey('users.id'))
+    owner = relationship('User')
 
-    # self=None --
-    # we are using this to someone check to see if a preexisting acl is in place
-    # honestly not sure why self=None, is this a default argument?
-    # how can you call this function without self, what would the point be?
     def __acl__(self=None):
         return getattr(self, 'acl', None) or ToDo.default_acl
+
+    @classmethod
+    def by_id(cls, todo_id):
+        # Do an int() just in case '1' was passed in
+        return Session.query(cls).filter_by(id=int(todo_id)).first()
+
+    @classmethod
+    def list(cls):
+        return Session.query(cls).order_by(cls.title)
 
 def todo_factory(request):
     todo_id = request.matchdict.get('id')
@@ -38,13 +47,14 @@ def todo_factory(request):
         raise HTTPNotFound()
     return todo
 
+
 sample_todos = [
     dict(title='Get Milk'),
     dict(title='Get Eggs'),
     dict(title='Secure Task',
          acl=[
-             ('Allow', 'group:admins', 'edit'),
-             ('Allow', 'group:admins', 'view')
+             ('Allow', 'group:admins', 'view'),
+             ('Allow', 'group:admins', 'edit')
          ]
          )
 ]

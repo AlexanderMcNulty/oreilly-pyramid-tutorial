@@ -8,7 +8,7 @@ from pyramid.view import (
 
 from pyramid_sqlalchemy import Session
 
-from ..models.users import User
+from ..users.models import User
 
 
 class SiteViews:
@@ -38,7 +38,7 @@ class SiteViews:
         request = self.request
         username = request.params['username']
         password = request.params['password']
-        user = Session.query(User).filter_by(username=username).first()
+        user = User.by_username(username)
         if user and user.password == password:
             headers = remember(request, username)
             return HTTPFound(location=request.route_url('home'),
