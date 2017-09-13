@@ -23,10 +23,19 @@ class User(BaseObject):
     todos = relationship('ToDo', backref='todo',
                          cascade='all, delete, delete-orphan')
 
-    __acl__ = [
-        (Allow, 'group:admins', 'view'),
-        (Allow, 'group:admins', 'edit')
-    ]
+    def __acl__(self=None):
+        # start with the ACEs for view/edit on /users
+        # ACE access control entries
+        acl = [
+            (Allow, 'group:admins', 'view'),
+            (Allow, 'group:admins', 'edit')
+        ]
+        if self is not None:
+            # We are on a User instance e.g. /users/admin, add owner
+            # ACEs to ACL
+            acl.append((Allow, self.username, 'view'))
+            acl.append((Allow, self.username, 'edit'))
+        return acl
 
     @property
     def title(self):
