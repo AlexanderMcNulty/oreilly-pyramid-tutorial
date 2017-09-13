@@ -36,5 +36,13 @@ sample_users = [
         first_name='Jack',
         last_name='Jones',
         groups=[]
+    ),
+    dict(
+        id=3,
+        username='admin',
+        password='admin3',
+        first_name='jane',
+        last_name='admin',
+        groups=['group:admins', 'group:editors']
     )
 ]

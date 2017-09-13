@@ -9,8 +9,8 @@ from pyramid_sqlalchemy import metadata
 from .security import groupfinder
 
 def main(global_config, **settings):
-    config = Configurator(settings=settings,
-                          root_factory='.resources.Root')
+    config = Configurator(settings=settings)
+
     config.include('pyramid_jinja2')
     config.scan()
     config.include('pyramid_sqlalchemy')
@@ -18,13 +18,20 @@ def main(global_config, **settings):
     config.add_static_view(name='deform_static', path='deform:static')
     config.add_static_view(name='static', path='mysite:static')
     config.add_route('home', '/')
-    config.add_route('todo_list', '/todo')
-    config.add_route('todo_add', '/todo/add')
-    config.add_route('todo_view', '/todo/{id}')
-    config.add_route('todo_edit', '/todo/{id}/edit')
-    config.add_route('todo_delete', '/todo/{id}/delete')
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+
+    # Todo routes with route factory
+    config.add_route('todos_list', '/todos',
+                     factory='.models.todos.todo_factory') # dotted path
+    config.add_route('todos_add', '/todos/add',
+                     factory='.models.todos.todo_factory')
+    config.add_route('todos_view', '/todos/{id}',
+                     factory='.models.todos.todo_factory')
+    config.add_route('todos_edit', '/todos/{id}/edit',
+                     factory='.models.todos.todo_factory')
+    config.add_route('todos_delete', '/todos/{id}/delete',
+                     factory='.models.todos.todo_factory')
 
     session_secret = settings['session.secret']
     session_factory = SignedCookieSessionFactory(session_secret)

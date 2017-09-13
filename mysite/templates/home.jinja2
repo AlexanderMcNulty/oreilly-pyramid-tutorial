@@ -1,27 +1,5 @@
-{%  extends "base.jinja2" %}
-{%  block title %}Home{% endblock %}
-{%  block content %}
-
-    {# python express, call to pyramid's request.route_url to compute our url #}
-    <a href="{{ request.route_url('todo_add') }}">add  </a>
-    <h1>ToDos - List</h1>
-    <br/>
-
-
-    {#  for some reason this does not cause the program to crash #}
-    {#
-    {% if msg %}
-        <h5>{{  msg }}</h5>
-    {% endif %}
-    #}
-
-    {# the id value that we are passing in our request.route_url is a nessesary
-    the value id is called such because in our __init__.py routes this is what is expected
-    other size the api will not work #}
-
-    <a href="{{ request.route_url('todo_add') }}">add  </a>
-
-    {#  why does this create an error???? #}
-    <a href="{{ request.route_url('todo_view',id=1) }}">sup </a>
-
+{% extends "base.jinja2" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    <h1>Welcome to MySite</h1>
 {% endblock %}

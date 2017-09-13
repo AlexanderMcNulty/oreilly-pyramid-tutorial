@@ -36,7 +36,9 @@ def main(argv=sys.argv):
     with transaction.manager:
         metadata.create_all()
         for todo in sample_todos:
-            t = ToDo(title=todo['title'])
+            t = ToDo(title=todo['title'],
+                     acl=todo.get('acl'))
+
             Session.add(t)
 
         for user in sample_users:

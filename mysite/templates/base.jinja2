@@ -21,13 +21,18 @@
         </div>
         <ul class="nav navbar-nav">
             <li>
-                <a href="{{ request.route_url('todo_list') }}">
+                <a href="{{ request.route_url('todos_list') }}">
                     ToDos
                 </a>
             </li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           {% if request.authenticated_userid %}
+              <li class="navbar-text">
+                {# it seems that authenticated_userid id specially created.
+                    it follows the format userid... nvm #}
+                {{ request.authenticated_userid }}
+              </li>
               <li>
                   <a href="{{ request.route_url('logout') }}">Logout</a>
               </li>

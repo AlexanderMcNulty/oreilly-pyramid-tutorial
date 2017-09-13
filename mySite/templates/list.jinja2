@@ -1,26 +1,43 @@
-{%  extends "base.jinja2" %}
-{%  block title %}ToDos List{% endblock %}
-{%  block content %}
+{% extends "base.jinja2" %}
+{% block title %}ToDos List{% endblock %}
+{% block content %}
 
-    {# python express, call to pyramid's request.route_url to compute our url #}
-    <a href="{{ request.route_url('todo_add') }}">add  </a>
+  {% if msg %}
+      <div class="alert alert-info">
+        {{ msg }}
+      </div>
+  {% endif %}
+    <a class="btn btn-primary pull-right"
+       href="{{ request.route_url('todos_add') }}">Add</a>
     <h1>ToDos - List</h1>
-    <br/>
 
-    {% if msg %}
-        <h5>{{  msg }}</h5>
-    {% endif %}
 
-    {# the id value that we are passing in our request.route_url is a nessesary
-    the value id is called such because in our __init__.py routes this is what is expected
-    other size the api will not work #}
+    <ul class="list-group col-md-6">
+      {% for todo in todos %}
+      {% if request.has_permission('view', todo) %}
+          <li class="list-group-item">
 
-    {# if and for are both examples of control structures #}
+              <a href="{{ request.route_url('todos_view', id=todo.id) }}">
+                {{ todo.title }}
+              </a>
 
-    {%  for todo in todos %}
-        <a href="{{ request.route_url('todo_view', id=todo.id) }}">title: {{ todo.title }}</a>
-        <a href="{{ request.route_url('todo_edit', id=todo.id) }}">edit</a>
-        <a href="{{ request.route_url('todo_delete', id=todo.id) }}">delete  </a>
-        <br/><br/>
-    {% endfor %}
+              {% if request.has_permission('edit', todo) %}
+              <div class="btn-group  pull-right" role="group">
+                  <a class="btn btn-default btn-xs"
+                      href="{{ request.route_url('todos_edit', id=todo.id) }}">
+                      <span class="glyphicon glyphicon-pencil"
+                            aria-hidden="true"></span> edit
+                  </a>
+                  <a class="btn btn-default btn-xs"
+                      href="{{ request.route_url('todos_delete', id=todo.id) }}">
+                      <span class="glyphicon glyphicon-trash"
+                            aria-hidden="true"></span> delete
+                  </a>
+              </div>
+              {% endif %}
+
+          </li>
+      {% endif %}
+      {% endfor %}
+    </ul>
 {% endblock %}
