@@ -1,0 +1,17 @@
+<a class="btn btn-primary pull-right" href="#/todos/add">Add</a>
+<h1>ToDos</h1>
+
+<ul class="list-group col-md-6">
+  <li class="list-group-item" ng-repeat="todo in ctrl.todos">
+    <a ng-href="#/todos/{{todo.id}}">{{ todo.title }}</a>
+
+    <div class="btn-group  pull-right" role="group">
+      <a class="btn btn-default btn-xs" href="#/todos/{{todo.id}}/edit">
+        edit
+      </a>
+      <button class="btn btn-default btn-xs"
+              ng-click="ctrl.delete(todo)">delete
+      </button>
+    </div>
+  </li>
+</ul>
