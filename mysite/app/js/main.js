@@ -19512,7 +19512,69 @@ module.exports = require('./lib/React');
 
 },{}],160:[function(require,module,exports){
 var React = require('react');
+
+class FlavorForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { value: 'coconut' };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ value: event.target.value });
+  }
+
+  handleSubmit(event) {
+    alert('Your favorite flavor is: ' + this.state.value);
+    event.preventDefault();
+  }
+
+  render() {
+    return React.createElement(
+      'form',
+      { onSubmit: this.handleSubmit },
+      React.createElement(
+        'label',
+        null,
+        'Pick your favorite La Croix flavor:',
+        React.createElement(
+          'select',
+          { value: this.state.value, onChange: this.handleChange },
+          React.createElement(
+            'option',
+            { value: 'grapefruit' },
+            'Grapefruit'
+          ),
+          React.createElement(
+            'option',
+            { value: 'lime' },
+            'Lime'
+          ),
+          React.createElement(
+            'option',
+            { value: 'coconut' },
+            'Coconut'
+          ),
+          React.createElement(
+            'option',
+            { value: 'mango' },
+            'Mango'
+          )
+        )
+      ),
+      React.createElement('input', { type: 'submit', value: 'Submit' })
+    );
+  }
+}
+
+module.exports = FlavorForm;
+
+},{"react":158}],161:[function(require,module,exports){
+var React = require('react');
 var ListItem = require('./ListItem.jsx');
+var FlavorForm = require('./FlavorForm.jsx');
 var HTTP = require('../services/httpservice');
 
 var List = React.createClass({
@@ -19532,16 +19594,21 @@ var List = React.createClass({
         });
 
         return React.createElement(
-            'ul',
+            'div',
             null,
-            listItems
+            React.createElement(
+                'ul',
+                null,
+                listItems
+            ),
+            React.createElement(FlavorForm, null)
         );
     }
 });
 
 module.exports = List;
 
-},{"../services/httpservice":163,"./ListItem.jsx":161,"react":158}],161:[function(require,module,exports){
+},{"../services/httpservice":164,"./FlavorForm.jsx":160,"./ListItem.jsx":162,"react":158}],162:[function(require,module,exports){
 var React = require('react');
 
 var ListItem = React.createClass({
@@ -19562,14 +19629,14 @@ var ListItem = React.createClass({
 
 module.exports = ListItem;
 
-},{"react":158}],162:[function(require,module,exports){
+},{"react":158}],163:[function(require,module,exports){
 var React = require('react');
 var ReactDOM = require('react-dom');
 var List = require('./components/List.jsx');
 
 ReactDOM.render(React.createElement(List, null), document.getElementById('ingredients'));
 
-},{"./components/List.jsx":160,"react":158,"react-dom":29}],163:[function(require,module,exports){
+},{"./components/List.jsx":161,"react":158,"react-dom":29}],164:[function(require,module,exports){
 var Fetch = require('whatwg-fetch');
 var baseUrl = 'http://localhost:6543';
 
@@ -19583,4 +19650,4 @@ var service = {
 
 module.exports = service;
 
-},{"whatwg-fetch":159}]},{},[162]);
+},{"whatwg-fetch":159}]},{},[163]);

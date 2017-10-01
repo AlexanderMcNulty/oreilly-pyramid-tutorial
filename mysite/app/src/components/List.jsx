@@ -1,5 +1,6 @@
 var React = require('react');
 var ListItem = require('./ListItem.jsx');
+var FlavorForm = require('./FlavorForm.jsx');
 var HTTP = require('../services/httpservice');
 
 var List = React.createClass({
@@ -17,7 +18,12 @@ var List = React.createClass({
             return <ListItem key={item.id} ingredient={item.title} />;
         });
 
-        return (<ul>{listItems}</ul>);
+        return (
+            <div>
+                <ul>{listItems}</ul>
+                <FlavorForm />
+            </div>
+        );
     }
 });
 
